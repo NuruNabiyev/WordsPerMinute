@@ -1,4 +1,4 @@
-package com.nurunabiyev.wpmapp.features.greetings.presentation
+package com.nurunabiyev.wpmapp.features.greetings.presentation.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
