@@ -1,4 +1,4 @@
-package com.nurunabiyev.wpmapp
+package com.nurunabiyev.wpmapp.features.greetings.presentation.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ParagraphScreen()
+                    GreetingScreen()
                 }
             }
         }

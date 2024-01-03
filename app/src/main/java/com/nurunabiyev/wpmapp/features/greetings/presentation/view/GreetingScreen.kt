@@ -15,6 +15,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -23,11 +24,18 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.nurunabiyev.wpmapp.core.di.userRepo
+import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
+import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 
 @Composable
 fun GreetingScreen() {
+    val greetingViewModel = remember {
+        GreetingsViewModel(RegisterUserUC(userRepo))
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -53,14 +61,18 @@ fun GreetingScreen() {
         )
 
         Button(
-            modifier = Modifier.padding(top = 16.dp).align(Alignment.End),
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .align(Alignment.End),
             onClick = {
-                /* Do something! */
+                greetingViewModel.registerUser(text.text)
             }
         ) {
             Text("Start the test")
             Icon(
-                modifier = Modifier.padding(start = 12.dp).size(18.dp),
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .size(18.dp),
                 imageVector = Icons.Outlined.ArrowForward,
                 contentDescription = "Next"
             )
