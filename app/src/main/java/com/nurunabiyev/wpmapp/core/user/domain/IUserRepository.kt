@@ -2,5 +2,6 @@ package com.nurunabiyev.wpmapp.core.user.domain
 
 
 interface IUserRepository {
-    fun registerNewUser(user: User)
+    suspend fun registerNewUser(user: User)
+    suspend fun getUser(username: String): User?
 }

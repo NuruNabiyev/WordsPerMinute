@@ -10,9 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +27,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nurunabiyev.wpmapp.core.di.userRepo
+import com.nurunabiyev.wpmapp.features.greetings.domain.GetUserUC
 import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
 import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Typography
@@ -33,7 +36,10 @@ import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 @Composable
 fun GreetingScreen() {
     val greetingViewModel = remember {
-        GreetingsViewModel(RegisterUserUC(userRepo))
+        GreetingsViewModel(
+            RegisterUserUC(userRepo),
+            GetUserUC(userRepo),
+        )
     }
 
     Column(
@@ -47,12 +53,24 @@ fun GreetingScreen() {
         val intro2 = "Enter your username to keep records."
         Text(intro2, style = Typography.bodyLarge)
 
+        val isError = remember { derivedStateOf { greetingViewModel.error.isNotEmpty() } }
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(TextFieldValue("", TextRange(0, 7)))
         }
 
         TextField(
             value = text,
+            singleLine = true,
+            isError = isError.value,
+            supportingText = {
+                if (isError.value) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Error: ${greetingViewModel.error}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),

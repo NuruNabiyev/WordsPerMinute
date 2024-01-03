@@ -3,16 +3,10 @@ package com.nurunabiyev.wpmapp.features.greetings.domain
 import com.nurunabiyev.wpmapp.core.user.domain.IUserRepository
 import com.nurunabiyev.wpmapp.core.user.domain.User
 
-/**
- * I follow clean architecture,
- *  where use cases are intermediary between viewmodel and repository
- */
-
-
-class RegisterUserUC(
+class GetUserUC(
     private val userRepo: IUserRepository,
 ) {
-    suspend operator fun invoke(user: User) {
-        return userRepo.registerNewUser(user)
+    suspend operator fun invoke(username: String): User? {
+        return userRepo.getUser(username)
     }
 }
