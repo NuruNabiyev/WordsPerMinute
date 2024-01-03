@@ -1,18 +1,18 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.presentation.view
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +34,7 @@ fun ParagraphScreen() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Button(onClick = { vm.reset() }) { Text(text = "Reset") }
         ReferenceParagraph()
         UserEditText()
         Stats()
@@ -42,16 +43,14 @@ fun ParagraphScreen() {
 
 @Composable
 private fun ReferenceParagraph() {
+    val updatedParagraph = remember { derivedStateOf { vm.nextReferenceText() } }
+
+    updatedParagraph.value.spanStyles.forEach {
+        println("spans: $it")
+    }
     Text(text = "Text to copy:", style = Typography.headlineSmall)
-    val intro = """
-            He thought he would light the fire when
-            he got inside, and make himself some
-            breakfast, just to pass away the time;
-            but he did not seem able to handle anything
-            from a scuttleful of coals to a
-        """.trimIndent()
     Text(
-        intro,
+        updatedParagraph.value,
         style = Typography.bodyLarge,
         fontSize = 15.sp,
         modifier = Modifier
@@ -68,12 +67,10 @@ private fun UserEditText() {
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
         onValueChange = {
-            Log.d(TAG, "onValueChange $it")
             vm.registerNewKeystroke(it)
         },
         keyboardOptions = KeyboardOptions(autoCorrect = false),
         modifier = Modifier
-            .height(100.dp)
             .fillMaxWidth()
             .padding(top = 8.dp),
         label = { Text("Start typing") }
