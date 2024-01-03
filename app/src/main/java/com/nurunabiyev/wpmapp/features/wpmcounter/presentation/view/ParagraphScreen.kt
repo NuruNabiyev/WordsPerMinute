@@ -12,8 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,9 +21,7 @@ import com.nurunabiyev.wpmapp.ui.theme.Pink40
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 
-private const val TAG = "textlogtag"
-
-val vm = TypingViewModel()
+private val vm = TypingViewModel()
 
 @Composable
 fun ParagraphScreen() {
@@ -43,14 +39,9 @@ fun ParagraphScreen() {
 
 @Composable
 private fun ReferenceParagraph() {
-    val updatedParagraph = remember { derivedStateOf { vm.nextReferenceText() } }
-
-    updatedParagraph.value.spanStyles.forEach {
-        println("spans: $it")
-    }
     Text(text = "Text to copy:", style = Typography.headlineSmall)
     Text(
-        updatedParagraph.value,
+        vm.currentReference.value,
         style = Typography.bodyLarge,
         fontSize = 15.sp,
         modifier = Modifier
@@ -67,6 +58,7 @@ private fun UserEditText() {
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
         onValueChange = {
+            println("onValueChange $it")
             vm.registerNewKeystroke(it)
         },
         keyboardOptions = KeyboardOptions(autoCorrect = false),

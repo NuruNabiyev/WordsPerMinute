@@ -13,23 +13,29 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.BAD
-import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.view.vm
+import com.nurunabiyev.wpmapp.ui.theme.correctLetter
+import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
 
 class TypingViewModel {
-    val referenceText = """
-            He thought he would light the fire when
-            he got inside, and make himself some
-            breakfast, just to pass away the time;
-            but he did not seem able to handle anything
-            from a scuttleful of coals to a
+    private val referenceText = """
+            He thought
         """.trimIndent()
+//    private val referenceText = """
+//            He thought he would light the fire when
+//            he got inside, and make himself some
+//            breakfast, just to pass away the time;
+//            but he did not seem able to handle anything
+//            from a scuttleful of coals to a
+//        """.trimIndent()
 
     var text by mutableStateOf(TextFieldValue())
     val rawBads = mutableStateListOf<BAD>()
+    var currentReference = mutableStateOf(restOfReference(0))
 
     fun registerNewKeystroke(current: TextFieldValue) {
         if (!validate(current)) return
 
+        // todo sometimes multple chars are entered at once
         val generatedBAD = BAD(
             keyCodeChar = current.text.lastOrNull() ?: return,
             keyEnterTime = System.currentTimeMillis(),
@@ -37,8 +43,8 @@ class TypingViewModel {
             username = "TODO"
         )
         rawBads.add(generatedBAD)
-
         text = current
+        generateNextReferenceText()
     }
 
     private fun validate(current: TextFieldValue): Boolean {
@@ -47,43 +53,44 @@ class TypingViewModel {
             current.detectDeletion(text) -> false
             current.cursorNotInTheEnd -> false
             current.text == text.text -> false
+            text.text.length >= referenceText.length -> false
             else -> true
         }
     }
 
-    fun nextReferenceText(): AnnotatedString {
-        return try {
-            buildAnnotatedString {
-                vm.rawBads.forEachIndexed { index, it ->
-                    if (it.keyCodeChar == vm.referenceText[index]) {
-                        withStyle(style = SpanStyle(color = Color(0xFF3A923C))) {
-                            append(it.keyCodeChar)
-                        }
-                    } else {
-                        withStyle(style = SpanStyle(color = Color(0xFFC02318))) {
-                            append(vm.referenceText[index])
-                        }
-                    }
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.Bold,
-                        textDecoration = TextDecoration.Underline
-                    )
-                ) {
-                    append(vm.referenceText.substring(vm.rawBads.size, vm.rawBads.size + 1))
-                }
-                append(vm.referenceText.substring(vm.rawBads.size + 1))
+    private fun generateNextReferenceText() {
+        if (rawBads.isEmpty() || rawBads.size > referenceText.length) return
+        currentReference.value = buildAnnotatedString {
+            append(currentReference.value.subSequence(0, rawBads.size - 1))
+            if (rawBads.last().keyCodeChar == referenceText[rawBads.lastIndex]) {
+                withStyle(correctLetter) { append(rawBads.last().keyCodeChar) }
+            } else {
+                withStyle(incorrectLetter) { append(referenceText[rawBads.lastIndex]) }
             }
-        } catch (e: StringIndexOutOfBoundsException) {
-            reset()
-            nextReferenceText()
+            if (rawBads.size < referenceText.length) {
+                append(restOfReference(rawBads.size))
+            }
+        }
+    }
+
+    private fun restOfReference(from: Int): AnnotatedString {
+        return buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline
+                )
+            ) {
+                append(referenceText.substring(from, from + 1))
+            }
+            append(referenceText.substring(from + 1))
         }
     }
 
     fun reset() {
-        vm.text = TextFieldValue()
+        text = TextFieldValue()
         rawBads.clear()
+        currentReference.value = restOfReference(0)
     }
 }
 
