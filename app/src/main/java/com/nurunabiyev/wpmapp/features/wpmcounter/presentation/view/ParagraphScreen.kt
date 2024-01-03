@@ -57,6 +57,7 @@ private fun UserEditText() {
     OutlinedTextField(
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
+        enabled = vm.inputEnabled,
         onValueChange = {
             println("onValueChange $it")
             vm.registerNewKeystroke(it)

@@ -32,10 +32,14 @@ class TypingViewModel {
     val rawBads = mutableStateListOf<BAD>()
     var currentReference = mutableStateOf(restOfReference(0))
 
+    val inputEnabled
+        get()= text.text.length < referenceText.length
+
     fun registerNewKeystroke(current: TextFieldValue) {
         if (!validate(current)) return
 
         // todo sometimes multple chars are entered at once
+        // todo copy-paste is not disabled
         val generatedBAD = BAD(
             keyCodeChar = current.text.lastOrNull() ?: return,
             keyEnterTime = System.currentTimeMillis(),
@@ -52,8 +56,8 @@ class TypingViewModel {
             current.hasSelection -> false
             current.detectDeletion(text) -> false
             current.cursorNotInTheEnd -> false
-            current.text == text.text -> false
-            text.text.length >= referenceText.length -> false
+            current.text == text.text -> false // causes to loop on copy-paste todo fix
+            //text.text.length + 1 < current.text.length -> false
             else -> true
         }
     }
