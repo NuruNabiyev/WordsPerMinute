@@ -13,7 +13,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
-import com.nurunabiyev.wpmapp.features.wpmcounter.domain.BAD
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Keystroke
 import com.nurunabiyev.wpmapp.ui.theme.correctLetter
 import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
 import kotlinx.coroutines.Dispatchers
@@ -35,10 +35,12 @@ class TypingViewModel: ViewModel() {
     var text by mutableStateOf(TextFieldValue())
     var currentReference = mutableStateOf(restOfReference(0))
 
-    private val rawBads = arrayListOf<BAD>()
-    private val latestBad = MutableSharedFlow<BAD>()
+    private val rawKeystrokes = arrayListOf<Keystroke>()
+    private var latestKeystroke = MutableSharedFlow<Keystroke>()
+        private set
 
-    val analytics = Analytics(latestBad, currentReference, viewModelScope)
+    var analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
+        private set
 
     val inputEnabled
         get()= text.text.length < referenceText.length
@@ -47,20 +49,17 @@ class TypingViewModel: ViewModel() {
         if (!validate(current)) return
         // todo sometimes multple chars are entered at once
         // todo copy-paste is not disabled
-        val generatedBAD = BAD(
+        val generatedKeystroke = Keystroke(
             keyCodeChar = current.text.lastOrNull() ?: return,
             keyEnterTime = System.currentTimeMillis(),
             phoneOrientation = false,// todo
             username = "TODO"
         )
-        rawBads.add(generatedBAD)
+        rawKeystrokes.add(generatedKeystroke)
         text = current
         viewModelScope.launch(Dispatchers.Default) {
             generateNextReferenceText()
-            currentReference.value.spanStyles.forEach {
-                println(" ref=${it}")
-            }
-            latestBad.emit(generatedBAD)
+            latestKeystroke.emit(generatedKeystroke)
         }
     }
 
@@ -69,23 +68,26 @@ class TypingViewModel: ViewModel() {
             current.hasSelection -> false
             current.detectDeletion(text) -> false
             current.cursorNotInTheEnd -> false
-            current.text == text.text -> false // causes to loop on copy-paste todo fix
+            current.text == text.text -> {
+                text = current
+                false // causes to loop on copy-paste todo fix
+            }
             //text.text.length + 1 < current.text.length -> false
             else -> true
         }
     }
 
     private fun generateNextReferenceText() {
-        if (rawBads.isEmpty() || rawBads.size > referenceText.length) return
+        if (rawKeystrokes.isEmpty() || rawKeystrokes.size > referenceText.length) return
         currentReference.value = buildAnnotatedString {
-            append(currentReference.value.subSequence(0, rawBads.size - 1))
-            if (rawBads.last().keyCodeChar == referenceText[rawBads.lastIndex]) {
-                withStyle(correctLetter) { append(rawBads.last().keyCodeChar) }
+            append(currentReference.value.subSequence(0, rawKeystrokes.size - 1))
+            if (rawKeystrokes.last().keyCodeChar == referenceText[rawKeystrokes.lastIndex]) {
+                withStyle(correctLetter) { append(rawKeystrokes.last().keyCodeChar) }
             } else {
-                withStyle(incorrectLetter) { append(referenceText[rawBads.lastIndex]) }
+                withStyle(incorrectLetter) { append(referenceText[rawKeystrokes.lastIndex]) }
             }
-            if (rawBads.size < referenceText.length) {
-                append(restOfReference(rawBads.size))
+            if (rawKeystrokes.size < referenceText.length) {
+                append(restOfReference(rawKeystrokes.size))
             }
         }
     }
@@ -106,8 +108,10 @@ class TypingViewModel: ViewModel() {
 
     fun reset() {
         text = TextFieldValue()
-        rawBads.clear()
+        rawKeystrokes.clear()
         currentReference.value = restOfReference(0)
+        latestKeystroke = MutableSharedFlow()
+        analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
     }
 }
 

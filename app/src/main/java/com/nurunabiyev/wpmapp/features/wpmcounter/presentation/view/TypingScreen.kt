@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nurunabiyev.wpmapp.core.utils.printLog
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel.TypingViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Pink40
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
-import kotlinx.coroutines.flow.asStateFlow
 
 private val vm = TypingViewModel()
 
@@ -61,7 +61,7 @@ private fun UserEditText() {
         shape = RoundedCornerShape(8.dp),
         enabled = vm.inputEnabled,
         onValueChange = {
-            println("onValueChange $it")
+            printLog("onValueChange $it")
             vm.registerNewKeystroke(it)
         },
         keyboardOptions = KeyboardOptions(autoCorrect = false),
@@ -82,7 +82,7 @@ private fun Stats() {
             .fillMaxWidth()
     ) {
         val wpmCount = """
-                  WPM: ${vm.analytics.currentWPM.collectAsState().value}
+                  WPM: ${vm.analytics.currentStats.value.wpm}
                   Accuracy: 49
                   Mistakes 28
                   AdjustedWPM: 35

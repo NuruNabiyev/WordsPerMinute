@@ -23,13 +23,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var screen by rememberSaveable { mutableStateOf(Screen.Greetings) }
-                    when (screen) {
-                        Screen.Greetings -> GreetingScreen(onUserRegistered = {
-                            screen = Screen.Type
-                        })
-                        Screen.Type -> TypingScreen()
-                    }
+                    TypingScreen()
+//                    var screen by rememberSaveable { mutableStateOf(Screen.Greetings) }
+//                    when (screen) {
+//                        Screen.Greetings -> GreetingScreen(onUserRegistered = {
+//                            screen = Screen.Type
+//                        })
+//                        Screen.Type -> TypingScreen()
+//                    }
                 }
             }
         }
