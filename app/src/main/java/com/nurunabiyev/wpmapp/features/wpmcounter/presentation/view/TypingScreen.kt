@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel.TypingV
 import com.nurunabiyev.wpmapp.ui.theme.Pink40
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
+import kotlinx.coroutines.flow.asStateFlow
 
 private val vm = TypingViewModel()
 
@@ -57,6 +59,7 @@ private fun UserEditText() {
     OutlinedTextField(
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
+        enabled = vm.inputEnabled,
         onValueChange = {
             println("onValueChange $it")
             vm.registerNewKeystroke(it)
@@ -79,7 +82,10 @@ private fun Stats() {
             .fillMaxWidth()
     ) {
         val wpmCount = """
-                  WPM: 50       Accuracy: 49     Mistakes 28    AdjustedWPM: 35
+                  WPM: ${vm.analytics.currentWPM.collectAsState().value}
+                  Accuracy: 49
+                  Mistakes 28
+                  AdjustedWPM: 35
                   """.trimIndent()
         Text(
             wpmCount,
