@@ -19,6 +19,7 @@ class GreetingsViewModel(
 ): ViewModel() {
     var error by mutableStateOf(NO_ERROR)
         private set
+    var registrationCompleted by mutableStateOf(false)
 
     fun registerUser(username: String) {
         error = validate(username)
@@ -31,6 +32,7 @@ class GreetingsViewModel(
                 return@launch
             }
             registerUserUC(User(Random.nextInt(), username))
+            registrationCompleted = true
         }
     }
 
@@ -38,6 +40,10 @@ class GreetingsViewModel(
         if (username.isEmpty()) return "Can't be empty"
         if (username.length > 20) return "Too long"
         return NO_ERROR
+    }
+
+    fun resetError() {
+        error = NO_ERROR
     }
 
     companion object {

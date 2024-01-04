@@ -24,7 +24,7 @@ import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 private val vm = TypingViewModel()
 
 @Composable
-fun ParagraphScreen() {
+fun TypingScreen() {
     Column(
         Modifier
             .fillMaxSize()
@@ -94,6 +94,6 @@ private fun Stats() {
 @Composable
 fun ParagraphPreview() {
     WpmAppTheme {
-        ParagraphScreen()
+        TypingScreen()
     }
 }

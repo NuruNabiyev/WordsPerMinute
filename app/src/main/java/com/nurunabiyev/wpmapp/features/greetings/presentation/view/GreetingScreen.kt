@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,21 +36,24 @@ import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.Greeting
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 
-@Composable
-fun GreetingScreen() {
-    val greetingViewModel = remember {
-        GreetingsViewModel(
-            RegisterUserUC(userRepo),
-            GetUserUC(userRepo),
-        )
-    }
+// todo di
+private val greetingViewModel = GreetingsViewModel(
+    RegisterUserUC(userRepo),
+    GetUserUC(userRepo),
+)
 
+@Composable
+fun GreetingScreen(onUserRegistered: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        if (greetingViewModel.registrationCompleted) {
+            onUserRegistered()
+        }
+
         val intro = "Welcome to Word Per Minute Counter!"
         Text(intro, style = Typography.titleLarge)
         val intro2 = "Enter your username to keep records."
@@ -57,6 +63,7 @@ fun GreetingScreen() {
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(TextFieldValue("", TextRange(0, 7)))
         }
+        val focusRequester = remember { FocusRequester() }
 
         TextField(
             value = text,
@@ -73,8 +80,12 @@ fun GreetingScreen() {
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .focusRequester(focusRequester)
                 .padding(top = 16.dp),
-            onValueChange = { text = it },
+            onValueChange = {
+                greetingViewModel.resetError()
+                text = it
+            },
             label = { Text("Username") }
         )
 
@@ -95,6 +106,10 @@ fun GreetingScreen() {
                 contentDescription = "Next"
             )
         }
+
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
     }
 }
 
@@ -102,6 +117,6 @@ fun GreetingScreen() {
 @Composable
 fun GreetingPreview() {
     WpmAppTheme {
-        GreetingScreen()
+        GreetingScreen {}
     }
 }
