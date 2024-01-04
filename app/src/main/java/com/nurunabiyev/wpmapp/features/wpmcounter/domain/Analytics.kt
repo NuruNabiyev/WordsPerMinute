@@ -8,6 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class Analytics(
     val referenceText: String,
@@ -22,55 +26,50 @@ class Analytics(
         ReferenceInput(it, isLetter)
     }
     private val stats = mutableStateListOf<Stats>()
+    private var typingStartTime = AtomicLong(0)
+    private var lastCharacterReceivedTime = 0L
+    private val MAX_WAIT_TIME = 5_000L
+    private var totalCorrectWords = AtomicInteger(0)
 
-    val currentStats = derivedStateOf { stats.lastOrNull() ?: Stats() }
+    val currentStat = derivedStateOf { stats.lastOrNull() ?: Stats() }
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
             input.collectIndexed { index, value ->
+                if (value.keyEnterTime - lastCharacterReceivedTime > MAX_WAIT_TIME) {
+                    typingStartTime.set(value.keyEnterTime)
+                    totalCorrectWords.set(0)
+                }
                 currentSOA[index].input = value
                 currentSOA[index].isInputCorrect = value.keyCodeChar ==  currentSOA[index].referenceChar
-                printLog(currentSOA[index])
+                lastCharacterReceivedTime = value.keyEnterTime
+
                 calculateWPM(index)
             }
         }
     }
 
     private fun calculateWPM(index: Int) {
-        var canCalculate = true
-        if (currentSOA.size == index + 1) canCalculate = true
-        else if (currentSOA[index + 1].isPartOfWord) canCalculate = false  // todo last (single) letter
-
-        if (!canCalculate) return
+        if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return
         // area where this is the end of a word
 
-
-        val i: Int = currentSOA.indexOfFirstLetterOfTheWord(index)
-        val word = currentSOA.subList(i, index + 1)
-        val allLettersOfThisWordAreCorrect = word.all { it.isInputCorrect == true }
-
-        printLog("allLettersOfThisWordAreCorrect = $allLettersOfThisWordAreCorrect; " +
-                "indexOfFirstLetterInThisWord = $i")
-        /*
-        if next one is aux, then check that all previous letters of a word are correct
-        start = time of first correct word letter
-        this_wpm = 60 / (this wc - start)
-        new_stat = (stats.add { wpm } + this_wpm) / stats.size+1
-        stats.add(new_stat)
-         */
-    }
-
-    private inline fun List<ReferenceInput>.indexOfFirstLetterOfTheWord(
-        indexOfLastCharacterOfTheWord: Int,
-    ): Int {
-        val i = this.subList(0, indexOfLastCharacterOfTheWord)
-            .listIterator(indexOfLastCharacterOfTheWord)
-        while (i.hasPrevious()) {
-            if (!i.previous().isPartOfWord) {
-                return i.nextIndex() + 1
+        val iterator = currentSOA.subList(0, index + 1).listIterator(index + 1)
+        var wordIsCorrect = true
+        do {
+            val p = iterator.previous()
+            wordIsCorrect = when {
+                p.isPartOfWord && p.isInputCorrect == true -> continue
+                else -> !p.isPartOfWord
             }
-        }
-        return 0
+            break
+        } while (iterator.hasPrevious())
+
+        if (!wordIsCorrect) return
+        val timePassedSinceTypingStarted = currentSOA[index].input!!.keyEnterTime - typingStartTime.get()
+        if (timePassedSinceTypingStarted == 0L) return // just started
+        val wpm = 60_000 / timePassedSinceTypingStarted * totalCorrectWords.incrementAndGet()
+
+        stats.add(currentStat.value.copy(wpm = wpm.toInt()))
     }
 
     ////// OPTIONAL

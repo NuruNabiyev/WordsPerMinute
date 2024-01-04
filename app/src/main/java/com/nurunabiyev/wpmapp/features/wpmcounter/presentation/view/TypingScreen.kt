@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,10 +59,7 @@ private fun UserEditText() {
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
         enabled = vm.inputEnabled,
-        onValueChange = {
-            printLog("onValueChange $it")
-            vm.registerNewKeystroke(it)
-        },
+        onValueChange = { vm.registerNewKeystroke(it) },
         keyboardOptions = KeyboardOptions(autoCorrect = false),
         modifier = Modifier
             .fillMaxWidth()
@@ -82,7 +78,7 @@ private fun Stats() {
             .fillMaxWidth()
     ) {
         val wpmCount = """
-                  WPM: ${vm.analytics.currentStats.value.wpm}
+                  WPM: ${vm.analytics.currentStat.value.wpm}
                   Accuracy: 49
                   Mistakes 28
                   AdjustedWPM: 35
