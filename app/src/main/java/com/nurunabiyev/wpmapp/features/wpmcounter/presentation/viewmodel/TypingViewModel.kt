@@ -1,10 +1,8 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -12,11 +10,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.BAD
 import com.nurunabiyev.wpmapp.ui.theme.correctLetter
 import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
-class TypingViewModel {
+class TypingViewModel: ViewModel() {
     private val referenceText = """
             He thought
         """.trimIndent()
@@ -29,15 +33,18 @@ class TypingViewModel {
 //        """.trimIndent()
 
     var text by mutableStateOf(TextFieldValue())
-    val rawBads = mutableStateListOf<BAD>()
     var currentReference = mutableStateOf(restOfReference(0))
+
+    private val rawBads = arrayListOf<BAD>()
+    private val latestBad = MutableSharedFlow<BAD>()
+
+    val analytics = Analytics(latestBad, currentReference, viewModelScope)
 
     val inputEnabled
         get()= text.text.length < referenceText.length
 
     fun registerNewKeystroke(current: TextFieldValue) {
         if (!validate(current)) return
-
         // todo sometimes multple chars are entered at once
         // todo copy-paste is not disabled
         val generatedBAD = BAD(
@@ -48,7 +55,13 @@ class TypingViewModel {
         )
         rawBads.add(generatedBAD)
         text = current
-        generateNextReferenceText()
+        viewModelScope.launch(Dispatchers.Default) {
+            generateNextReferenceText()
+            currentReference.value.spanStyles.forEach {
+                println(" ref=${it}")
+            }
+            latestBad.emit(generatedBAD)
+        }
     }
 
     private fun validate(current: TextFieldValue): Boolean {
