@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,32 +45,13 @@ class Analytics(
                 currentSOA[index].isInputCorrect = value.keyCodeChar ==  currentSOA[index].referenceChar
                 lastCharacterReceivedTime = value.keyEnterTime
 
-                calculateWPM(index)
+                Calculator.values().forEach {
+                    it.calculate(currentSOA, index, typingStartTime, totalCorrectWords)?.let {
+                        stats.add(currentStat.value.copy(wpm = it))
+                    }
+                }
             }
         }
-    }
-
-    private fun calculateWPM(index: Int) {
-        if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return
-        // area where this is the end of a word
-
-        val iterator = currentSOA.subList(0, index + 1).listIterator(index + 1)
-        var wordIsCorrect = true
-        do {
-            val p = iterator.previous()
-            wordIsCorrect = when {
-                p.isPartOfWord && p.isInputCorrect == true -> continue
-                else -> !p.isPartOfWord
-            }
-            break
-        } while (iterator.hasPrevious())
-
-        if (!wordIsCorrect) return
-        val timePassedSinceTypingStarted = currentSOA[index].input!!.keyEnterTime - typingStartTime.get()
-        if (timePassedSinceTypingStarted == 0L) return // just started
-        val wpm = 60_000 / timePassedSinceTypingStarted * totalCorrectWords.incrementAndGet()
-
-        stats.add(currentStat.value.copy(wpm = wpm.toInt()))
     }
 
     ////// OPTIONAL
@@ -87,9 +69,55 @@ class Analytics(
     }
 }
 
-private data class ReferenceInput(
+data class ReferenceInput(
     val referenceChar: Char,
     val isPartOfWord: Boolean,
     var input: Keystroke? = null,
     var isInputCorrect: Boolean? = null
 )
+
+enum class Calculator {
+    WPM {
+        override fun calculate(
+            currentSOA: List<ReferenceInput>,
+            index: Int,
+            typingStartTime: AtomicLong,
+            totalCorrectWords: AtomicInteger
+        ): Int? {
+            if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return null
+            // area where this is the end of a word
+
+            val sublist = currentSOA.subList(0, index + 1)
+            val iterator = sublist.listIterator(index + 1)
+            printLog("  ${sublist.map { it.referenceChar }}")
+
+            var wordIsCorrect = false
+            do {
+                val p = iterator.previous()
+                printLog("  p = ${p.referenceChar}")
+                if (p.isPartOfWord && p.isInputCorrect == true) {
+                    wordIsCorrect = true
+                    continue
+                } else {
+                    wordIsCorrect = !p.isPartOfWord && wordIsCorrect
+                    break
+                }
+            } while (iterator.hasPrevious())
+
+            if (!wordIsCorrect) return null
+            val timePassedSinceTypingStarted =
+                currentSOA[index].input!!.keyEnterTime - typingStartTime.get()
+            if (timePassedSinceTypingStarted == 0L) return null // just started
+            val perMinute = 60_000.0 / timePassedSinceTypingStarted
+            val wpm = perMinute * totalCorrectWords.incrementAndGet()
+            return wpm.roundToInt()
+        }
+    };
+
+    abstract fun calculate(
+        currentSOA: List<ReferenceInput>,
+        index: Int,
+        typingStartTime: AtomicLong,
+        totalCorrectWords: AtomicInteger
+    ): Int?
+}
