@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nurunabiyev.wpmapp.core.utils.printLog
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel.TypingViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Pink40
 import com.nurunabiyev.wpmapp.ui.theme.Typography
@@ -79,8 +78,8 @@ private fun Stats() {
     ) {
         val wpmCount = """
                   WPM: ${vm.analytics.currentStat.value.wpm}
-                  Accuracy: --
-                  Mistakes ${vm.analytics.currentStat.value.mistakes}
+                  Character accuracy: ${vm.analytics.currentStat.value.wordCharacterAccuracy}%
+                  Mistakes --
                   AdjustedWPM: --
                   """.trimIndent()
         Text(

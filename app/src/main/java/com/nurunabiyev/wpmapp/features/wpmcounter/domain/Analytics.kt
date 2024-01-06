@@ -2,6 +2,9 @@ package com.nurunabiyev.wpmapp.features.wpmcounter.domain
 
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.CharacterAccuracy
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.ICalc
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.WPM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,6 +31,13 @@ class Analytics(
     private val MAX_WAIT_TIME = 5_000L
     private var totalCorrectWords = AtomicInteger(0)
 
+    private val calculators: List<ICalc> by lazy {
+        listOf(
+            WPM(),
+            CharacterAccuracy(),
+        )
+    }
+
     val currentStat = derivedStateOf { stats.lastOrNull() ?: Stats() }
 
     init {
@@ -48,12 +58,17 @@ class Analytics(
     }
 
     private fun runCalculators(index: Int) {
-        Calculator.values().forEach { calculator ->
-            val result = calculator.calculate(currentSOA, index, typingStartTime, totalCorrectWords)
-                ?: return@forEach
+        // todo await for each result
+        calculators.forEach { calculator ->
+            val result = calculator.calculate(
+                currentSOA,
+                index,
+                typingStartTime.get(),
+                totalCorrectWords
+            ) ?: return@forEach
             val newStat = when (calculator) {
-                Calculator.WPM -> currentStat.value.copy(wpm = result)
-                Calculator.MISTAKES -> currentStat.value.copy(mistakes = result)
+                is WPM -> currentStat.value.copy(wpm = result)
+                is CharacterAccuracy -> currentStat.value.copy(wordCharacterAccuracy = result)
             }
             stats.add(newStat)
         }
