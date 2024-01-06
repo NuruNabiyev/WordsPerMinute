@@ -21,23 +21,22 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 class TypingViewModel: ViewModel() {
-    private val referenceText = """
-            He would, do
-        """.trimIndent()
 //    private val referenceText = """
-//            He thought he would light the fire when
-//            he got inside, and make himself some
-//            breakfast, just to pass away the time;
-//            but he did not seem able to handle anything
-//            from a scuttleful of coals to a
+//            He would, do
 //        """.trimIndent()
+    private val referenceText = """
+            He thought he would light the fire when
+            he got inside, and make himself some
+            breakfast, just to pass away the time;
+            but he did not seem able to handle anything
+            from a scuttleful of coals to a
+        """.trimIndent()
 
     var text by mutableStateOf(TextFieldValue())
     var currentReference = mutableStateOf(restOfReference(0))
 
     private val rawKeystrokes = arrayListOf<Keystroke>()
     private var latestKeystroke = MutableSharedFlow<Keystroke>()
-        private set
 
     var analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
         private set

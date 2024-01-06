@@ -11,13 +11,11 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 class Analytics(
     val referenceText: String,
     val input: MutableSharedFlow<Keystroke>,
-    viewModelScope: CoroutineScope
+    scope: CoroutineScope
 ) {
     /**
      * Current state of affairs between reference text and input
@@ -35,7 +33,7 @@ class Analytics(
     val currentStat = derivedStateOf { stats.lastOrNull() ?: Stats() }
 
     init {
-        viewModelScope.launch(Dispatchers.Default) {
+        scope.launch(Dispatchers.Default) {
             input.collectIndexed { index, value ->
                 if (value.keyEnterTime - lastCharacterReceivedTime > MAX_WAIT_TIME) {
                     typingStartTime.set(value.keyEnterTime)
@@ -45,27 +43,18 @@ class Analytics(
                 currentSOA[index].isInputCorrect = value.keyCodeChar ==  currentSOA[index].referenceChar
                 lastCharacterReceivedTime = value.keyEnterTime
 
-                Calculator.values().forEach {
-                    it.calculate(currentSOA, index, typingStartTime, totalCorrectWords)?.let {
-                        stats.add(currentStat.value.copy(wpm = it))
-                    }
+                Calculator.values().forEach { calculator ->
+                    calculator.calculate(currentSOA, index, typingStartTime, totalCorrectWords)
+                        ?.let { result ->
+                            val new = when (calculator) {
+                                Calculator.WPM -> currentStat.value.copy(wpm = result)
+                                Calculator.MISTAKES -> currentStat.value.copy(mistakes = result)
+                            }
+                            stats.add(new)
+                        }
                 }
             }
         }
-    }
-
-    ////// OPTIONAL
-
-    fun getCurrentWordAccuracy(): Int {
-        TODO("Not implemented")
-    }
-
-    fun getCurrentMistakes(): Int {
-        TODO("Not implemented")
-    }
-
-    fun getCurrentAdjustedWPM(): Int {
-        TODO("Not implemented")
     }
 }
 
@@ -83,7 +72,7 @@ enum class Calculator {
             index: Int,
             typingStartTime: AtomicLong,
             totalCorrectWords: AtomicInteger
-        ): Int? {
+        ): Int? { // todo Monad
             if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return null
             // area where this is the end of a word
 
@@ -109,10 +98,42 @@ enum class Calculator {
                 currentSOA[index].input!!.keyEnterTime - typingStartTime.get()
             if (timePassedSinceTypingStarted == 0L) return null // just started
             val perMinute = 60_000.0 / timePassedSinceTypingStarted
-            val wpm = perMinute * totalCorrectWords.incrementAndGet()
+            val wpm = perMinute * totalCorrectWords.incrementAndGet() // todo should not mutate here
             return wpm.roundToInt()
         }
-    };
+    },
+
+    ////// OPTIONAL PART OF ASSIGNMENT
+
+    MISTAKES {
+        override fun calculate(
+            currentSOA: List<ReferenceInput>,
+            index: Int,
+            typingStartTime: AtomicLong,
+            totalCorrectWords: AtomicInteger
+        ): Int {
+            val sublist = currentSOA.subList(0, index + 1)
+            val iterator = sublist.listIterator(index + 1)
+            printLog("  ${sublist.map { it.referenceChar }}")
+
+            var c = 0
+            var prevCharIsWord = false
+            do {
+                val p = iterator.previous()
+                if (p.isPartOfWord && !prevCharIsWord) {
+                    c++
+                    prevCharIsWord = true
+                } else if (!p.isPartOfWord) {
+                    prevCharIsWord = false
+                }
+            } while (iterator.hasPrevious())
+
+            val totalNumberOfReferenceWordsUntilNow = c
+            return totalNumberOfReferenceWordsUntilNow - totalCorrectWords.get()
+        }
+    },
+
+    ;
 
     abstract fun calculate(
         currentSOA: List<ReferenceInput>,
