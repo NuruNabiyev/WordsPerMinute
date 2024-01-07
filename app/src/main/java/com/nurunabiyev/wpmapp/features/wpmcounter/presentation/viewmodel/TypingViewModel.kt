@@ -1,5 +1,6 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel
 
+import android.content.res.Configuration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nurunabiyev.wpmapp.core.user.domain.User
+import com.nurunabiyev.wpmapp.core.utils.cursorNotInTheEnd
+import com.nurunabiyev.wpmapp.core.utils.detectDeletion
+import com.nurunabiyev.wpmapp.core.utils.hasSelection
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Keystroke
 import com.nurunabiyev.wpmapp.ui.theme.correctLetter
@@ -44,6 +49,9 @@ class TypingViewModel: ViewModel() {
     val inputEnabled
         get()= text.text.length < referenceText.length
 
+    lateinit var user: User
+    var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
+
     fun registerNewKeystroke(current: TextFieldValue) {
         if (!validate(current)) return
         // todo sometimes multple chars are entered at once
@@ -51,8 +59,8 @@ class TypingViewModel: ViewModel() {
         val generatedKeystroke = Keystroke(
             keyCodeChar = current.text.lastOrNull() ?: return,
             keyEnterTime = System.currentTimeMillis(),
-            phoneOrientation = false,// todo
-            username = "TODO"
+            phoneOrientation = currentOrientation,
+            username = user.username
         )
         rawKeystrokes.add(generatedKeystroke)
         text = current
@@ -104,22 +112,4 @@ class TypingViewModel: ViewModel() {
             append(referenceText.substring(from + 1))
         }
     }
-
-    fun reset() {
-        text = TextFieldValue()
-        rawKeystrokes.clear()
-        currentReference.value = restOfReference(0)
-        latestKeystroke = MutableSharedFlow()
-        analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
-    }
-}
-
-val TextFieldValue.hasSelection: Boolean
-    get() = !selection.collapsed
-
-val TextFieldValue.cursorNotInTheEnd: Boolean
-    get() = selection.min < text.length
-
-fun TextFieldValue.detectDeletion(original: TextFieldValue): Boolean {
-    return text.length < original.text.length
 }

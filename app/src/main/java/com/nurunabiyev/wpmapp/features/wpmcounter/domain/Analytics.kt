@@ -14,6 +14,19 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
+/**
+ * Maps each character in the reference text to input.
+ *
+ * In order to optimize calculations, additional pre-calculations are done,s.a. [isPartOfWord]
+ *
+ */
+data class ReferenceInput(
+    val referenceChar: Char,
+    val isPartOfWord: Boolean,
+    var input: Keystroke? = null,
+    var isInputCorrect: Boolean? = null
+)
+
 class Analytics(
     referenceText: String,
     private val input: MutableSharedFlow<Keystroke>,
@@ -73,13 +86,6 @@ class Analytics(
     }
 
     companion object {
-        const val MAX_WAIT_TIME = 4_000L
+        const val MAX_WAIT_TIME = 3_000L
     }
 }
-
-data class ReferenceInput(
-    val referenceChar: Char,
-    val isPartOfWord: Boolean,
-    var input: Keystroke? = null,
-    var isInputCorrect: Boolean? = null
-)

@@ -9,6 +9,6 @@ package com.nurunabiyev.wpmapp.features.wpmcounter.domain
 data class Keystroke(
     val keyEnterTime: Long,
     val keyCodeChar: Char,
-    val phoneOrientation: Boolean,
+    val phoneOrientation: Int,
     val username: String
 )

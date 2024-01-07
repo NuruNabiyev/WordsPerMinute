@@ -53,7 +53,7 @@ class AnalyticsTest {
                 val generatedKeystroke = Keystroke(
                     keyCodeChar = it,
                     keyEnterTime = System.currentTimeMillis(),
-                    phoneOrientation = false,// todo
+                    phoneOrientation = 1,
                     username = "TODO"
                 )
                 latestKeystroke.emit(generatedKeystroke)

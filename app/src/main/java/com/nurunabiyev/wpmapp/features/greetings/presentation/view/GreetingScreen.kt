@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nurunabiyev.wpmapp.core.di.userRepo
+import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.greetings.domain.GetUserUC
 import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
 import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
@@ -43,16 +44,14 @@ private val greetingViewModel = GreetingsViewModel(
 )
 
 @Composable
-fun GreetingScreen(onUserRegistered: () -> Unit) {
+fun GreetingScreen(onUserRegistered: (User) -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        if (greetingViewModel.registrationCompleted) {
-            onUserRegistered()
-        }
+        greetingViewModel.registrationCompleted?.let(onUserRegistered)
 
         val intro = "Welcome to Word Per Minute Counter!"
         Text(intro, style = Typography.titleLarge)
@@ -117,6 +116,6 @@ fun GreetingScreen(onUserRegistered: () -> Unit) {
 @Composable
 fun GreetingPreview() {
     WpmAppTheme {
-        GreetingScreen {}
+        //GreetingScreen {}
     }
 }

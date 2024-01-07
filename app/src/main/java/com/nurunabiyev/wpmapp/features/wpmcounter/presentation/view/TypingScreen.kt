@@ -1,16 +1,16 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.presentation.view
 
-import androidx.compose.animation.core.animateDpAsState
+import android.content.res.Configuration
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,13 +19,16 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel.TypingViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Pink40
@@ -33,39 +36,53 @@ import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 import kotlinx.coroutines.delay
 
-private val vm = TypingViewModel()
-
 @Composable
-fun TypingScreen() {
-    Column(
+fun TypingScreen(user: User, vm: TypingViewModel = viewModel()) {
+    vm.user = user
+
+    Box(
         Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Button(onClick = { vm.reset() }) { Text(text = "Reset") }
-        ReferenceParagraph()
-        UserEditText()
-        Stats()
+        val configuration = LocalConfiguration.current
+        vm.currentOrientation = configuration.orientation
+        when (configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                Row {
+                    ReferenceParagraph(Modifier.weight(2f), vm.currentReference.value)
+                    UserEditText(Modifier.weight(1f), vm)
+                    Stats(vm.analytics)
+                }
+            }
+
+            else -> {
+                Column {
+                    Stats(vm.analytics)
+                    ReferenceParagraph(Modifier.fillMaxWidth(1f), vm.currentReference.value)
+                    UserEditText(Modifier.fillMaxWidth(1f), vm)
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun ReferenceParagraph() {
-    Text(text = "Text to copy:", style = Typography.headlineSmall)
+private fun ReferenceParagraph(modifier: Modifier, currentReference: AnnotatedString) {
     Text(
-        vm.currentReference.value,
+        currentReference,
         style = Typography.bodyLarge,
         fontSize = 15.sp,
         modifier = Modifier
             .padding(top = 8.dp)
             .background(Pink40.copy(0.1f), shape = RoundedCornerShape(8.dp))
             .padding(18.dp)
-            .fillMaxWidth()
+            .then(modifier)
     )
 }
 
 @Composable
-private fun UserEditText() {
+private fun UserEditText(modifier: Modifier, vm: TypingViewModel) {
     OutlinedTextField(
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
@@ -73,14 +90,14 @@ private fun UserEditText() {
         onValueChange = { vm.registerNewKeystroke(it) },
         keyboardOptions = KeyboardOptions(autoCorrect = false),
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
+            .padding(top = 8.dp)
+            .then(modifier),
         label = { Text("Start typing") }
     )
 }
 
 @Composable
-private fun Stats() {
+private fun Stats(analytics: Analytics) {
     var statsAreLive by remember { mutableStateOf(false) }
 
     val fontWeight by remember {
@@ -97,7 +114,7 @@ private fun Stats() {
     LaunchedEffect(key1 = fontWeight, block = {
         while (true) {
             delay(50)
-            val diff = System.currentTimeMillis() - vm.analytics.lastTypeTime.value
+            val diff = System.currentTimeMillis() - analytics.lastTypeTime.value
             statsAreLive = when {
                 diff < Analytics.MAX_WAIT_TIME -> true
                 else -> false
@@ -110,12 +127,11 @@ private fun Stats() {
             .padding(top = 8.dp)
             .background(Pink40.copy(0.1f), shape = RoundedCornerShape(8.dp))
             .padding(18.dp)
-            .fillMaxWidth()
     ) {
         val wpmCount = """
-                  WPM: ${vm.analytics.currentStat.value.wpm}
-                  Character accuracy: ${vm.analytics.currentStat.value.wordCharacterAccuracy}%
-                  Net WPM: ${vm.analytics.currentStat.value.wpmWithAccuracy}
+                  WPM: ${analytics.currentStat.value.wpm}
+                  Character accuracy: ${analytics.currentStat.value.wordCharacterAccuracy}%
+                  Net WPM: ${analytics.currentStat.value.wpmWithAccuracy}
                   """.trimIndent()
         Text(
             wpmCount,
@@ -131,6 +147,6 @@ private fun Stats() {
 @Composable
 fun ParagraphPreview() {
     WpmAppTheme {
-        TypingScreen()
+        TypingScreen(User(-1, "default"))
     }
 }

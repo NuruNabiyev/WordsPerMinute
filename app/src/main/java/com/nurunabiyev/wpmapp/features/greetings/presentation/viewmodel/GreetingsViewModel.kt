@@ -19,7 +19,7 @@ class GreetingsViewModel(
 ): ViewModel() {
     var error by mutableStateOf(NO_ERROR)
         private set
-    var registrationCompleted by mutableStateOf(false)
+    var registrationCompleted by mutableStateOf<User?>(null)
 
     fun registerUser(username: String) {
         error = validate(username)
@@ -31,8 +31,9 @@ class GreetingsViewModel(
                 error = "User exists"
                 return@launch
             }
-            registerUserUC(User(Random.nextInt(), username))
-            registrationCompleted = true
+            val user = User(Random.nextInt(), username)
+            registerUserUC(user)
+            registrationCompleted = user
         }
     }
 
