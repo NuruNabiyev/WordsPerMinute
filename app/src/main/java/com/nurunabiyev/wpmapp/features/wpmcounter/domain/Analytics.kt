@@ -29,7 +29,6 @@ class Analytics(
     private val stats = mutableStateListOf<Stats>()
     private var typingStartTime = AtomicLong(0)
     private var lastCharacterReceivedTime = 0L
-    private val MAX_WAIT_TIME = 5_000L
 
     private val calculators: List<ICalc> by lazy {
         listOf(
@@ -40,6 +39,9 @@ class Analytics(
     }
 
     val currentStat = derivedStateOf { stats.lastOrNull() ?: Stats() }
+    val lastTypeTime = derivedStateOf {
+        ((stats.lastOrNull() ?: Stats()) to System.currentTimeMillis()).second
+    }
 
     init {
         scope.launch(Dispatchers.Default) {
@@ -68,6 +70,10 @@ class Analytics(
             ) ?: return@forEach
             stats.add(result)
         }
+    }
+
+    companion object {
+        const val MAX_WAIT_TIME = 4_000L
     }
 }
 
