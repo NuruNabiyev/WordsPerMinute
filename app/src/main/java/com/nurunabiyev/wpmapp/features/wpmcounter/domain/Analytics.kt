@@ -4,6 +4,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.CharacterAccuracy
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.ICalc
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.NetWPM
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators.WPM
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,7 @@ class Analytics(
         listOf(
             WPM(),
             CharacterAccuracy(),
+            NetWPM(),
         )
     }
 
@@ -57,16 +59,17 @@ class Analytics(
     }
 
     private fun runCalculators(index: Int) {
-        // todo await for each result
         calculators.forEach { calculator ->
             val result = calculator.calculate(
                 currentSOA,
                 index,
-                typingStartTime.get()
+                typingStartTime.get(),
+                currentStat.value
             ) ?: return@forEach
             val newStat = when (calculator) {
                 is WPM -> currentStat.value.copy(wpm = result)
                 is CharacterAccuracy -> currentStat.value.copy(wordCharacterAccuracy = result)
+                is NetWPM -> currentStat.value.copy(wpmWithAccuracy = result)
             }
             stats.add(newStat)
         }

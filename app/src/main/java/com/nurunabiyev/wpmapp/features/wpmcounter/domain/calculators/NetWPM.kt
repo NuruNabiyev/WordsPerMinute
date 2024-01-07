@@ -2,17 +2,22 @@ package com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators
 
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.ReferenceInput
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Stats
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.roundToInt
 
-sealed interface ICalc {
-    fun calculate(
+class NetWPM : ICalc {
+
+    override fun calculate(
         currentSOA: List<ReferenceInput>,
         index: Int,
         typingStartTime: Long,
         currentStats: Stats
-    ): Int?
+    ): Int {
+        val netWPM = currentStats.wpm * currentStats.wordCharacterAccuracy / 100.0
+        return netWPM.roundToInt()
+    }
 
-    /**
-     * Some calculators need to be reset, e.g. when user does not type for some time
-     */
-    fun reset() {}
+    override fun reset() {
+
+    }
 }

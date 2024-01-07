@@ -1,6 +1,7 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators
 
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.ReferenceInput
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Stats
 import kotlin.math.roundToInt
 
 class CharacterAccuracy : ICalc {
@@ -11,6 +12,7 @@ class CharacterAccuracy : ICalc {
         currentSOA: List<ReferenceInput>,
         index: Int,
         typingStartTime: Long,
+        currentStats: Stats
     ): Int? {
         if (!currentSOA[index].isPartOfWord || currentSOA[index].isInputCorrect == null) return null
         when (currentSOA[index].isInputCorrect) {

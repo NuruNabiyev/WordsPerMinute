@@ -1,6 +1,7 @@
 package com.nurunabiyev.wpmapp.features.wpmcounter.domain.calculators
 
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.ReferenceInput
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Stats
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.roundToInt
 
@@ -11,6 +12,7 @@ class WPM : ICalc {
         currentSOA: List<ReferenceInput>,
         index: Int,
         typingStartTime: Long,
+        currentStats: Stats
     ): Int? {
         if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return null
         // area where this is the end of a word

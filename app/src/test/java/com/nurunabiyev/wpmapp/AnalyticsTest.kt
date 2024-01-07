@@ -62,8 +62,13 @@ class AnalyticsTest {
 
         val correctWPM = (60_000.0 / timeToEnterText * correctWords).roundToInt()
         val calculatedWPM = analytics.currentStat.value.wpm
+        val wpmDifference = (calculatedWPM - correctWPM).absoluteValue
+
         val calculatedCharacterAccuracy = analytics.currentStat.value.wordCharacterAccuracy
-        val difference = (calculatedWPM - correctWPM).absoluteValue
+
+        val correctNetWPM = (correctWPM * correctAccuracy / 100.0).roundToInt()
+        val calculatedNetWPM = analytics.currentStat.value.wpmWithAccuracy
+        val netWpmDifference = (calculatedNetWPM - correctNetWPM).absoluteValue
 
         val log = """
             timeToEnterText=$timeToEnterText
@@ -73,16 +78,23 @@ class AnalyticsTest {
             
             correctAccuracy = $correctAccuracy
             calculatedCharacterAccuracy = $calculatedCharacterAccuracy
+            
+            correctNetWPM = $correctNetWPM
+            calculatedNetWPM = $calculatedNetWPM
         """.trimIndent()
         println(log)
 
         val passThreshold = 10
-        val isWpmCloseToCorrectWPM = difference < passThreshold
+        val isWpmCloseToCorrectWPM = wpmDifference < passThreshold
+        val isNetWpmCloseToCorrectWPM = netWpmDifference < passThreshold
 
         // wpm
         assert(isWpmCloseToCorrectWPM)
 
         // character accuracy
         assert(correctAccuracy == calculatedCharacterAccuracy)
+
+        // net wpm
+        assert(isNetWpmCloseToCorrectWPM)
     }
 }
