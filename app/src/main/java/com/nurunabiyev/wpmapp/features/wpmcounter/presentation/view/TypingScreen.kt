@@ -79,8 +79,6 @@ private fun Stats() {
         val wpmCount = """
                   WPM: ${vm.analytics.currentStat.value.wpm}
                   Character accuracy: ${vm.analytics.currentStat.value.wordCharacterAccuracy}%
-                  Mistakes --
-                  AdjustedWPM: --
                   """.trimIndent()
         Text(
             wpmCount,

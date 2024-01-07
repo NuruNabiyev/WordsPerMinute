@@ -29,7 +29,6 @@ class Analytics(
     private var typingStartTime = AtomicLong(0)
     private var lastCharacterReceivedTime = 0L
     private val MAX_WAIT_TIME = 5_000L
-    private var totalCorrectWords = AtomicInteger(0)
 
     private val calculators: List<ICalc> by lazy {
         listOf(
@@ -45,7 +44,7 @@ class Analytics(
             input.collectIndexed { index, value ->
                 if (value.keyEnterTime - lastCharacterReceivedTime > MAX_WAIT_TIME) {
                     typingStartTime.set(value.keyEnterTime)
-                    totalCorrectWords.set(0)
+                    calculators.forEach { it.reset() }
                 }
                 currentSOA[index].input = value
                 currentSOA[index].isInputCorrect =
@@ -63,8 +62,7 @@ class Analytics(
             val result = calculator.calculate(
                 currentSOA,
                 index,
-                typingStartTime.get(),
-                totalCorrectWords
+                typingStartTime.get()
             ) ?: return@forEach
             val newStat = when (calculator) {
                 is WPM -> currentStat.value.copy(wpm = result)

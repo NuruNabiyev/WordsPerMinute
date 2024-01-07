@@ -4,12 +4,13 @@ import com.nurunabiyev.wpmapp.features.wpmcounter.domain.ReferenceInput
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.roundToInt
 
-class WPM: ICalc {
+class WPM : ICalc {
+    private var totalCorrectWords = 0
+
     override fun calculate(
         currentSOA: List<ReferenceInput>,
         index: Int,
         typingStartTime: Long,
-        totalCorrectWords: AtomicInteger
     ): Int? {
         if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return null
         // area where this is the end of a word
@@ -34,7 +35,11 @@ class WPM: ICalc {
             currentSOA[index].input!!.keyEnterTime - typingStartTime
         if (timePassedSinceTypingStarted == 0L) return null // just started
         val perMinute = 60_000.0 / timePassedSinceTypingStarted
-        val wpm = perMinute * totalCorrectWords.incrementAndGet() // todo should not mutate here
+        val wpm = perMinute * ++totalCorrectWords
         return wpm.roundToInt()
+    }
+
+    override fun reset() {
+        totalCorrectWords = 0
     }
 }
