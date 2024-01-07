@@ -31,7 +31,7 @@ class AnalyticsTest {
             words p*r minute *nd other s
         """.trimIndent()
     private val correctWords = 10
-    private val incorrectWords = 4
+    private val correctAccuracy = (((56 - 5.0) / 56) * 100).roundToInt()
 
     private var latestKeystroke = MutableSharedFlow<Keystroke>()
     private var analytics = Analytics(referenceText, latestKeystroke, GlobalScope)
@@ -62,15 +62,17 @@ class AnalyticsTest {
 
         val correctWPM = (60_000.0 / timeToEnterText * correctWords).roundToInt()
         val calculatedWPM = analytics.currentStat.value.wpm
-        val calculatedMistakes = analytics.currentStat.value.mistakes
+        val calculatedCharacterAccuracy = analytics.currentStat.value.wordCharacterAccuracy
         val difference = (calculatedWPM - correctWPM).absoluteValue
 
         val log = """
             timeToEnterText=$timeToEnterText
+            
             correctWPM=$correctWPM
             calculatedWPM=$calculatedWPM
-            diff = $difference
-            calculatedMistakes = $calculatedMistakes
+            
+            correctAccuracy = $correctAccuracy
+            calculatedCharacterAccuracy = $calculatedCharacterAccuracy
         """.trimIndent()
         println(log)
 
@@ -80,7 +82,7 @@ class AnalyticsTest {
         // wpm
         assert(isWpmCloseToCorrectWPM)
 
-        // todo character accuracy
-        //assert(calculatedMistakes == incorrectWords)
+        // character accuracy
+        assert(correctAccuracy == calculatedCharacterAccuracy)
     }
 }
