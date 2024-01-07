@@ -54,7 +54,7 @@ class AnalyticsTest {
                     keyCodeChar = it,
                     keyEnterTime = System.currentTimeMillis(),
                     phoneOrientation = 1,
-                    username = "TODO"
+                    username = "user"
                 )
                 latestKeystroke.emit(generatedKeystroke)
             }

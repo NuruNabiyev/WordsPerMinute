@@ -49,7 +49,7 @@ class TypingViewModel: ViewModel() {
     val inputEnabled
         get()= text.text.length < referenceText.length
 
-    lateinit var user: User
+    var user: User? = null
     var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
 
     fun registerNewKeystroke(current: TextFieldValue) {
@@ -60,7 +60,7 @@ class TypingViewModel: ViewModel() {
             keyCodeChar = current.text.lastOrNull() ?: return,
             keyEnterTime = System.currentTimeMillis(),
             phoneOrientation = currentOrientation,
-            username = user.username
+            username = user!!.username
         )
         rawKeystrokes.add(generatedKeystroke)
         text = current

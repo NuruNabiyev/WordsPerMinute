@@ -1,6 +1,5 @@
 package com.nurunabiyev.wpmapp.features.greetings.presentation.view
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,28 +28,18 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.nurunabiyev.wpmapp.core.di.userRepo
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nurunabiyev.wpmapp.core.user.domain.User
-import com.nurunabiyev.wpmapp.features.greetings.domain.GetUserUC
-import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
 import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 
-// todo di
-private val greetingViewModel = GreetingsViewModel(
-    RegisterUserUC(userRepo),
-    GetUserUC(userRepo),
-)
-
 @Composable
-fun GreetingScreen(onUserRegistered: (User) -> Unit) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
+fun GreetingScreen(
+    onUserRegistered: (User) -> Unit,
+    greetingViewModel: GreetingsViewModel = viewModel()
+) {
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
         greetingViewModel.registrationCompleted?.let(onUserRegistered)
 
         val intro = "Welcome to Word Per Minute Counter!"
