@@ -9,7 +9,7 @@ sealed interface ICalc {
         index: Int,
         typingStartTime: Long,
         currentStats: Stats
-    ): Int?
+    ): Stats?
 
     /**
      * Some calculators need to be reset, e.g. when user does not type for some time

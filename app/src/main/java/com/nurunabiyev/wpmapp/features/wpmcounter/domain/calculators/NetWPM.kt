@@ -12,9 +12,9 @@ class NetWPM : ICalc {
         index: Int,
         typingStartTime: Long,
         currentStats: Stats
-    ): Int {
+    ): Stats {
         val netWPM = currentStats.wpm * currentStats.wordCharacterAccuracy / 100.0
-        return netWPM.roundToInt()
+        return currentStats.copy(wpmWithAccuracy = netWPM.roundToInt())
     }
 
     override fun reset() {

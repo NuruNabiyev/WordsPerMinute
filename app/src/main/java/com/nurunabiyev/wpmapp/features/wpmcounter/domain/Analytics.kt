@@ -66,12 +66,7 @@ class Analytics(
                 typingStartTime.get(),
                 currentStat.value
             ) ?: return@forEach
-            val newStat = when (calculator) {
-                is WPM -> currentStat.value.copy(wpm = result)
-                is CharacterAccuracy -> currentStat.value.copy(wordCharacterAccuracy = result)
-                is NetWPM -> currentStat.value.copy(wpmWithAccuracy = result)
-            }
-            stats.add(newStat)
+            stats.add(result)
         }
     }
 }

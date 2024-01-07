@@ -13,7 +13,7 @@ class WPM : ICalc {
         index: Int,
         typingStartTime: Long,
         currentStats: Stats
-    ): Int? {
+    ): Stats? {
         if (currentSOA.getOrNull(index + 1)?.isPartOfWord == true) return null
         // area where this is the end of a word
 
@@ -38,7 +38,7 @@ class WPM : ICalc {
         if (timePassedSinceTypingStarted == 0L) return null // just started
         val perMinute = 60_000.0 / timePassedSinceTypingStarted
         val wpm = perMinute * ++totalCorrectWords
-        return wpm.roundToInt()
+        return currentStats.copy(wpm = wpm.roundToInt())
     }
 
     override fun reset() {

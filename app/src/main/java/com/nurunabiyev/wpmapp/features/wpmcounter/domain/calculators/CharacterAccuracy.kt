@@ -13,7 +13,7 @@ class CharacterAccuracy : ICalc {
         index: Int,
         typingStartTime: Long,
         currentStats: Stats
-    ): Int? {
+    ): Stats? {
         if (!currentSOA[index].isPartOfWord || currentSOA[index].isInputCorrect == null) return null
         when (currentSOA[index].isInputCorrect) {
             true -> correctWordCharacters++
@@ -21,6 +21,6 @@ class CharacterAccuracy : ICalc {
             null -> return null
         }
         val ratio = correctWordCharacters.toFloat() / (correctWordCharacters + mistakenWordCharacters)
-        return (ratio * 100).roundToInt()
+        return currentStats.copy(wordCharacterAccuracy = (ratio * 100).roundToInt())
     }
 }
