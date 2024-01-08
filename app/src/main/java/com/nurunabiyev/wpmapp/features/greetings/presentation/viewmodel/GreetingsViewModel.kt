@@ -20,21 +20,21 @@ class GreetingsViewModel @Inject constructor(
     private val getUserUC: GetUserUC,
     private val registerUC: RegisterUserUC,
 ) : ViewModel() {
-    var error by mutableStateOf(NO_ERROR)
-        private set
+    var usernameText = mutableStateOf(NO_ERROR)
+    var error = mutableStateOf(NO_ERROR)
     var registrationCompleted by mutableStateOf<User?>(null)
 
-    fun registerUser(username: String) {
-        error = validate(username)
-        if (error.isNotEmpty()) return
+    fun registerUser() {
+        error.value = validate(usernameText.value)
+        if (error.value.isNotEmpty()) return
 
         viewModelScope.launch(Dispatchers.IO) {
-            if (getUserUC(username) != null) {
+            if (getUserUC(usernameText.value) != null) {
                 delay(100) // delay to let user see that error has updated
-                error = "User exists"
+                error.value = "User exists"
                 return@launch
             }
-            val user = User(Random.nextInt(), username)
+            val user = User(Random.nextInt(), usernameText.value)
             registerUC(user)
             registrationCompleted = user
         }
@@ -47,7 +47,7 @@ class GreetingsViewModel @Inject constructor(
     }
 
     fun resetError() {
-        error = NO_ERROR
+        error.value = NO_ERROR
     }
 
     companion object {

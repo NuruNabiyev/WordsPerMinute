@@ -1,6 +1,7 @@
 package com.nurunabiyev.wpmapp.features.greetings.presentation.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,18 +15,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,67 +33,80 @@ import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 @Composable
 fun GreetingScreen(
     onUserRegistered: (User) -> Unit,
-    greetingViewModel: GreetingsViewModel = hiltViewModel()
+    greetingVM: GreetingsViewModel = hiltViewModel()
 ) {
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        greetingViewModel.registrationCompleted?.let(onUserRegistered)
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
+        greetingVM.registrationCompleted?.let(onUserRegistered)
 
-        val intro = "Welcome to Word Per Minute Counter!"
-        Text(intro, style = Typography.titleLarge)
-        val intro2 = "Enter your username to keep records."
-        Text(intro2, style = Typography.bodyLarge)
+        Intro()
+        UsernameEditText(greetingVM.usernameText, greetingVM.error, greetingVM::resetError)
+        RegisterButton(greetingVM::registerUser)
+    }
+}
 
-        val isError = remember { derivedStateOf { greetingViewModel.error.isNotEmpty() } }
-        var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue("", TextRange(0, 7)))
-        }
-        val focusRequester = remember { FocusRequester() }
+@Composable
+private fun Intro() {
+    val intro = "Welcome to Word Per Minute Counter!"
+    Text(intro, style = Typography.titleLarge)
+    val intro2 = "Enter your username to keep the records."
+    Text(intro2, style = Typography.bodyLarge)
+}
 
-        TextField(
-            value = text,
-            singleLine = true,
-            isError = isError.value,
-            supportingText = {
-                if (isError.value) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "Error: ${greetingViewModel.error}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester)
-                .padding(top = 16.dp),
-            onValueChange = {
-                greetingViewModel.resetError()
-                text = it
-            },
-            label = { Text("Username") }
-        )
+@Composable
+private fun UsernameEditText(
+    username: MutableState<String>,
+    error: MutableState<String>,
+    resetError: () -> Unit
+) {
+    val isError = remember { derivedStateOf { error.value.isNotEmpty() } }
+    val focusRequester = remember { FocusRequester() }
 
-        Button(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .align(Alignment.End),
-            onClick = {
-                greetingViewModel.registerUser(text.text)
+    TextField(
+        value = username.value,
+        singleLine = true,
+        isError = isError.value,
+        supportingText = {
+            if (isError.value) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Error: ${error.value}",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
-        ) {
-            Text("Start the test")
-            Icon(
-                modifier = Modifier
-                    .padding(start = 12.dp)
-                    .size(18.dp),
-                imageVector = Icons.Outlined.ArrowForward,
-                contentDescription = "Next"
-            )
-        }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .padding(top = 16.dp),
+        onValueChange = {
+            resetError()
+            username.value = it
+        },
+        label = { Text("Username") }
+    )
 
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+}
+
+@Composable
+private fun ColumnScope.RegisterButton(registerUser: () -> Unit) {
+    Button(
+        modifier = Modifier.align(Alignment.End),
+        onClick = { registerUser() }
+    ) {
+        Text("Start the test")
+        Icon(
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .size(18.dp),
+            imageVector = Icons.Outlined.ArrowForward,
+            contentDescription = "Next"
+        )
     }
 }
 
