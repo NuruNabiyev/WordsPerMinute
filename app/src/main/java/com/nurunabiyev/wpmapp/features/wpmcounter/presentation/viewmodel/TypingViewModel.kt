@@ -85,7 +85,7 @@ class TypingViewModel @Inject constructor() : ViewModel() {
             current.cursorNotInTheEnd -> false
             current.text == text.text -> {
                 text = current
-                false // causes to loop on copy-paste todo fix
+                false
             }
 
             else -> true
