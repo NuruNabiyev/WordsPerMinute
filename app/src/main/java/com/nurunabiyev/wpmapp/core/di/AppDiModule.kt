@@ -22,6 +22,7 @@ object AppDiModule {
     }
 
     @Provides
+    @Singleton
     fun providesUserRepository(db: AppDatabase): IUserRepository {
         return UserRepositoryImpl(db.userDao())
     }

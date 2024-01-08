@@ -6,10 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.nurunabiyev.wpmapp.core.user.data.UserDao
 import com.nurunabiyev.wpmapp.core.user.data.UserDb
+import com.nurunabiyev.wpmapp.features.wpmcounter.data.AnalyticsDao
+import com.nurunabiyev.wpmapp.features.wpmcounter.data.StatsDb
 
-@Database(entities = [UserDb::class], version = 1)
+@Database(entities = [UserDb::class, StatsDb::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
+    abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
         @Volatile

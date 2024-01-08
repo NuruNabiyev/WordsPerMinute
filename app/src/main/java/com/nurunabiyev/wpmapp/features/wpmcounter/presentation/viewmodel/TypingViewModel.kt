@@ -19,16 +19,22 @@ import com.nurunabiyev.wpmapp.core.utils.detectDeletion
 import com.nurunabiyev.wpmapp.core.utils.hasSelection
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Keystroke
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.usecase.DeleteStatisticsUC
+import com.nurunabiyev.wpmapp.features.wpmcounter.domain.usecase.InsertStatisticsUC
 import com.nurunabiyev.wpmapp.ui.theme.correctLetter
 import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class TypingViewModel @Inject constructor() : ViewModel() {
+class TypingViewModel @Inject constructor(
+    private val insertStatisticsUC: InsertStatisticsUC,
+    private val deleteStatisticsUC: DeleteStatisticsUC
+) : ViewModel() {
     private val referenceText = """
             He thought he would light the fire when
             he got inside, and make himself some
@@ -71,7 +77,16 @@ class TypingViewModel @Inject constructor() : ViewModel() {
             }
         }
 
+        insertStatistics()
         text = current
+    }
+
+    private fun insertStatistics() {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                insertStatisticsUC.invoke(analytics.currentStat.value)
+            }
+        }
     }
 
     private fun getDiffText(new: TextFieldValue): String {
@@ -126,5 +141,8 @@ class TypingViewModel @Inject constructor() : ViewModel() {
         currentReference.value = restOfReference(0)
         rawKeystrokes.clear()
         analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
+        withContext(Dispatchers.IO) {
+            deleteStatisticsUC()
+        }
     }
 }
