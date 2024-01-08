@@ -46,7 +46,7 @@ class AnalyticsTest {
      * Please run this test multiple times; estimated time to run single time is 10 seconds
      */
     @Test
-    fun wpmTest() = runBlocking {
+    fun analytics_test() = runBlocking {
         val timeToEnterText = measureTimeMillis {
             simulatedText.forEach {
                 delay(Random.nextLong(100, 150)) // imitate human delay

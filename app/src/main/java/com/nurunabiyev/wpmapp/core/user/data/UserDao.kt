@@ -6,9 +6,6 @@ import androidx.room.Query
 
 @Dao
 interface UserDao {
-    @Query("SELECT * FROM users LIMIT 1")
-    suspend fun getAll(): List<UserDb>
-
     @Query("SELECT * FROM users WHERE username LIKE :username LIMIT 1")
     suspend fun findByUsername(username: String): UserDb?
 
