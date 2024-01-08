@@ -28,7 +28,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Typography
@@ -37,7 +37,7 @@ import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 @Composable
 fun GreetingScreen(
     onUserRegistered: (User) -> Unit,
-    greetingViewModel: GreetingsViewModel = viewModel()
+    greetingViewModel: GreetingsViewModel = hiltViewModel()
 ) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         greetingViewModel.registrationCompleted?.let(onUserRegistered)

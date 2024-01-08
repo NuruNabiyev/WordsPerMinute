@@ -5,15 +5,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nurunabiyev.wpmapp.core.di.getUserUC
-import com.nurunabiyev.wpmapp.core.di.registerUC
 import com.nurunabiyev.wpmapp.core.user.domain.User
+import com.nurunabiyev.wpmapp.features.greetings.domain.GetUserUC
+import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.random.Random
 
-class GreetingsViewModel: ViewModel() {
+@HiltViewModel
+class GreetingsViewModel @Inject constructor(
+    private val getUserUC: GetUserUC,
+    private val registerUC: RegisterUserUC,
+) : ViewModel() {
     var error by mutableStateOf(NO_ERROR)
         private set
     var registrationCompleted by mutableStateOf<User?>(null)

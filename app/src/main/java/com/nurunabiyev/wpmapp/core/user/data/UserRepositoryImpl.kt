@@ -2,8 +2,9 @@ package com.nurunabiyev.wpmapp.core.user.data
 
 import com.nurunabiyev.wpmapp.core.user.domain.IUserRepository
 import com.nurunabiyev.wpmapp.core.user.domain.User
+import javax.inject.Inject
 
-class UserRepositoryImpl(private val userDao: UserDao) : IUserRepository {
+class UserRepositoryImpl @Inject constructor(private val userDao: UserDao) : IUserRepository {
 
     override suspend fun registerNewUser(user: User) {
         userDao.insertAll(user.toUserDb())

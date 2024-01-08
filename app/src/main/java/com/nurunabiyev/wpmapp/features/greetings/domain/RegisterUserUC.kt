@@ -2,14 +2,9 @@ package com.nurunabiyev.wpmapp.features.greetings.domain
 
 import com.nurunabiyev.wpmapp.core.user.domain.IUserRepository
 import com.nurunabiyev.wpmapp.core.user.domain.User
+import javax.inject.Inject
 
-/**
- * I follow clean architecture,
- *  where use cases are intermediary between viewmodel and repository
- */
-
-
-class RegisterUserUC(
+class RegisterUserUC @Inject constructor(
     private val userRepo: IUserRepository,
 ) {
     suspend operator fun invoke(user: User) {

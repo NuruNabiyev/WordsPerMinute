@@ -18,11 +18,12 @@ This is a simple app yet
 7. SOLID principles
 8. Domain Driven Design, with separation from Database classes, such as User.kt and UserDb.kt; domain transfer objects
 9. Repository Patterns
-10. KISS and DRY principles are 
+10. KISS and DRY principles are applied
+11. Hilt is used for Dependency injection
 
 ### What is missing or could be improved
 1. Since this is an offline app, I skipped separating Repository internals into DatabaseSource and Network source (since only DB is present)
-2. Dependency injection for viewmodels is handled by Jetpack Compose, but for complex applications a DI library is needed
-3. Testing could be fine granular, but I decided to implement 'user-centric' test cases
-4. UI testing was not implemented in favor of previous point
-5. UI during landscape orientation could be improved
+2. Testing could be fine granular, but I decided to implement 'user-centric' test cases
+3. UI testing was not implemented in favor of previous point
+4. UI during landscape orientation could be improved
+5. UI Navigation library is not used in favor of simplicity 

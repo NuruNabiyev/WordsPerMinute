@@ -12,24 +12,13 @@ import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.nurunabiyev.wpmapp.core.user.data.userSaver
 import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.view.TypingScreen
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-val userSaver = run {
-    val id = "id"
-    val username = "username"
-    mapSaver(
-        save = { mapOf(id to it.id, username to it.username) },
-        restore = {
-            User(
-                id = it[id] as Int,
-                username = it[username] as String
-            )
-        }
-    )
-}
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +46,7 @@ class MainActivity : ComponentActivity() {
      * Simple navigation is used in this app, instead of a library
      * @see https://developer.android.com/jetpack/compose/navigation
      */
-    enum class Screen {
+    private enum class Screen {
         Greetings, Type
     } 
 }
