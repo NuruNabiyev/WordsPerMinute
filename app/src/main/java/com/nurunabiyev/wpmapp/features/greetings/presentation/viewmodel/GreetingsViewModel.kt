@@ -50,6 +50,12 @@ class GreetingsViewModel @Inject constructor(
         error.value = NO_ERROR
     }
 
+    fun reset() = viewModelScope.launch {
+        registrationCompleted = null
+        resetError()
+        usernameText.value = NO_ERROR
+    }
+
     companion object {
         const val NO_ERROR = ""
     }

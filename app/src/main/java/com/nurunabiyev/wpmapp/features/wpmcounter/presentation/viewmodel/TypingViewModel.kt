@@ -21,11 +21,14 @@ import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Keystroke
 import com.nurunabiyev.wpmapp.ui.theme.correctLetter
 import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TypingViewModel: ViewModel() {
+@HiltViewModel
+class TypingViewModel @Inject constructor() : ViewModel() {
     private val referenceText = """
             He thought he would light the fire when
             he got inside, and make himself some
@@ -44,7 +47,7 @@ class TypingViewModel: ViewModel() {
         private set
 
     val inputEnabled
-        get()= text.text.length < referenceText.length
+        get() = text.text.length < referenceText.length
 
     var user: User? = null
     var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
@@ -84,6 +87,7 @@ class TypingViewModel: ViewModel() {
                 text = current
                 false // causes to loop on copy-paste todo fix
             }
+
             else -> true
         }
     }
@@ -115,5 +119,12 @@ class TypingViewModel: ViewModel() {
             }
             append(referenceText.substring(from + 1))
         }
+    }
+
+    fun reset() = viewModelScope.launch {
+        text = TextFieldValue()
+        currentReference.value = restOfReference(0)
+        rawKeystrokes.clear()
+        analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
     }
 }

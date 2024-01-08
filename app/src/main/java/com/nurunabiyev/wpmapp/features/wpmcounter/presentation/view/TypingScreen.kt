@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -27,8 +28,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nurunabiyev.wpmapp.core.user.domain.User
+import com.nurunabiyev.wpmapp.core.utils.printLog
 import com.nurunabiyev.wpmapp.features.wpmcounter.domain.Analytics
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.viewmodel.TypingViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Pink40
@@ -37,8 +40,8 @@ import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun TypingScreen(user: User, vm: TypingViewModel = viewModel()) {
-    vm.user = user
+fun TypingScreen(user: User, typingVM: TypingViewModel = hiltViewModel()) {
+    typingVM.user = user
 
     Box(
         Modifier
@@ -46,25 +49,29 @@ fun TypingScreen(user: User, vm: TypingViewModel = viewModel()) {
             .padding(16.dp)
     ) {
         val configuration = LocalConfiguration.current
-        vm.currentOrientation = configuration.orientation
+        typingVM.currentOrientation = configuration.orientation
         when (configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
                 Row {
-                    ReferenceParagraph(Modifier.weight(2f), vm.currentReference.value)
-                    UserEditText(Modifier.weight(1f), vm)
-                    Stats(vm.analytics)
+                    ReferenceParagraph(Modifier.weight(2f), typingVM.currentReference.value)
+                    UserEditText(Modifier.weight(1f), typingVM)
+                    Stats(typingVM.analytics)
                 }
             }
 
             else -> {
                 Column {
-                    Stats(vm.analytics)
-                    ReferenceParagraph(Modifier.fillMaxWidth(1f), vm.currentReference.value)
-                    UserEditText(Modifier.fillMaxWidth(1f), vm)
+                    Stats(typingVM.analytics)
+                    ReferenceParagraph(Modifier.fillMaxWidth(1f), typingVM.currentReference.value)
+                    UserEditText(Modifier.fillMaxWidth(1f), typingVM)
                 }
             }
         }
     }
+
+    DisposableEffect(key1 = Unit, effect = {
+        onDispose { typingVM.reset() }
+    })
 }
 
 @Composable
