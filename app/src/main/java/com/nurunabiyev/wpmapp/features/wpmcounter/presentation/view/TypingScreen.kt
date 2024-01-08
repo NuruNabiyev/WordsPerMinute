@@ -87,7 +87,9 @@ private fun UserEditText(modifier: Modifier, vm: TypingViewModel) {
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
         enabled = vm.inputEnabled,
-        onValueChange = { vm.registerNewKeystroke(it) },
+        onValueChange = {
+            vm.registerNewKeystroke(it)
+        },
         keyboardOptions = KeyboardOptions(autoCorrect = false),
         modifier = Modifier
             .padding(top = 8.dp)
@@ -114,10 +116,12 @@ private fun Stats(analytics: Analytics) {
     LaunchedEffect(key1 = fontWeight, block = {
         while (true) {
             delay(50)
-            val diff = System.currentTimeMillis() - analytics.lastTypeTime.value
-            statsAreLive = when {
-                diff < Analytics.MAX_WAIT_TIME -> true
-                else -> false
+            runCatching {
+                val diff = System.currentTimeMillis() - analytics.lastTypeTime.value
+                statsAreLive = when {
+                    diff < Analytics.MAX_WAIT_TIME -> true
+                    else -> false
+                }
             }
         }
     })

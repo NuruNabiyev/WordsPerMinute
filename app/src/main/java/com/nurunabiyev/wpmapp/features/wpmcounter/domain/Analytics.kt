@@ -63,12 +63,14 @@ class Analytics(
                     typingStartTime.set(value.keyEnterTime)
                     calculators.forEach { it.reset() }
                 }
-                currentSOA[index].input = value
-                currentSOA[index].isInputCorrect =
-                    value.keyCodeChar == currentSOA[index].referenceChar
-                lastCharacterReceivedTime = value.keyEnterTime
+                if (index < currentSOA.size) {
+                    currentSOA[index].input = value
+                    currentSOA[index].isInputCorrect =
+                        value.keyCodeChar == currentSOA[index].referenceChar
+                    lastCharacterReceivedTime = value.keyEnterTime
 
-                runCalculators(index)
+                    runCalculators(index)
+                }
             }
         }
     }

@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 class TypingViewModel: ViewModel() {
-//    private val referenceText = """
-//            He would, do
-//        """.trimIndent()
     private val referenceText = """
             He thought he would light the fire when
             he got inside, and make himself some
@@ -54,20 +51,28 @@ class TypingViewModel: ViewModel() {
 
     fun registerNewKeystroke(current: TextFieldValue) {
         if (!validate(current)) return
-        // todo sometimes multple chars are entered at once
-        // todo copy-paste is not disabled
-        val generatedKeystroke = Keystroke(
-            keyCodeChar = current.text.lastOrNull() ?: return,
-            keyEnterTime = System.currentTimeMillis(),
-            phoneOrientation = currentOrientation,
-            username = user!!.username
-        )
-        rawKeystrokes.add(generatedKeystroke)
-        text = current
-        viewModelScope.launch(Dispatchers.Default) {
+
+        val diffText = getDiffText(current)
+
+        diffText.forEach {
+            val generatedKeystroke = Keystroke(
+                keyCodeChar = it,
+                keyEnterTime = System.currentTimeMillis(),
+                phoneOrientation = currentOrientation,
+                username = user!!.username
+            )
+            rawKeystrokes.add(generatedKeystroke)
             generateNextReferenceText()
-            latestKeystroke.emit(generatedKeystroke)
+            viewModelScope.launch(Dispatchers.Default) {
+                latestKeystroke.emit(generatedKeystroke)
+            }
         }
+
+        text = current
+    }
+
+    private fun getDiffText(new: TextFieldValue): String {
+        return new.text.substring(text.text.length)
     }
 
     private fun validate(current: TextFieldValue): Boolean {
@@ -79,7 +84,6 @@ class TypingViewModel: ViewModel() {
                 text = current
                 false // causes to loop on copy-paste todo fix
             }
-            //text.text.length + 1 < current.text.length -> false
             else -> true
         }
     }
