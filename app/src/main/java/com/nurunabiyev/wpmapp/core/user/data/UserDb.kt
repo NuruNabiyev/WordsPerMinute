@@ -7,9 +7,9 @@ import com.nurunabiyev.wpmapp.core.user.domain.User
 
 @Entity(tableName = "users")
 data class UserDb(
-    @PrimaryKey val uid: Int,
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     @ColumnInfo(name = "username") val username: String
 )
 
-fun UserDb.toUser() = User(uid, username)
-fun User.toUserDb() = UserDb(id, username)
+fun UserDb.toUser() = User(username)
+fun User.toUserDb() = UserDb(username = username)

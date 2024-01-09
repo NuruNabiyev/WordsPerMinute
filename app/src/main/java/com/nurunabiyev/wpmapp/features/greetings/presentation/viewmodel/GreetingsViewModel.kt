@@ -35,7 +35,7 @@ class GreetingsViewModel @Inject constructor(
                 error.value = "User exists"
                 return@launch
             }
-            val user = User(Random.nextInt(), usernameText.value)
+            val user = User(usernameText.value)
             registerUC(user)
             registrationCompleted.emit(user)
         }

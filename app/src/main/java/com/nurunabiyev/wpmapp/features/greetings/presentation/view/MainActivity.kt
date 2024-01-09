@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    var user by rememberSaveable(stateSaver = userSaver) { mutableStateOf(User(-1, "")) }
+                    var user by rememberSaveable(stateSaver = userSaver) { mutableStateOf(User("Test")) }
 
                     NavHost(
                         navController,
