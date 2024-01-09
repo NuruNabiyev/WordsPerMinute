@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -30,26 +29,24 @@ import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.greetings.presentation.viewmodel.GreetingsViewModel
 import com.nurunabiyev.wpmapp.ui.theme.Typography
 import com.nurunabiyev.wpmapp.ui.theme.WpmAppTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun GreetingScreen(
     onUserRegistered: (User) -> Unit,
     greetingVM: GreetingsViewModel = hiltViewModel()
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-        greetingVM.registrationCompleted?.let(onUserRegistered)
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
+        LaunchedEffect(Unit) {
+            greetingVM.registrationCompleted.collectLatest {
+                onUserRegistered(it)
+            }
+        }
 
         Intro()
         UsernameEditText(greetingVM.usernameText, greetingVM.error, greetingVM::resetError)
         RegisterButton(greetingVM::registerUser)
     }
-
-    DisposableEffect(key1 = Unit, effect = {
-        onDispose { greetingVM.reset() }
-    })
 }
 
 @Composable

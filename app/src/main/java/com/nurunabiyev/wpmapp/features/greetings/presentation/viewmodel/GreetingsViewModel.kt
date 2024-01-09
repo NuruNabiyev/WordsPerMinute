@@ -11,6 +11,7 @@ import com.nurunabiyev.wpmapp.features.greetings.domain.RegisterUserUC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
@@ -22,7 +23,7 @@ class GreetingsViewModel @Inject constructor(
 ) : ViewModel() {
     var usernameText = mutableStateOf(NO_ERROR)
     var error = mutableStateOf(NO_ERROR)
-    var registrationCompleted by mutableStateOf<User?>(null)
+    var registrationCompleted = MutableSharedFlow<User>()
 
     fun registerUser() {
         error.value = validate(usernameText.value)
@@ -36,7 +37,7 @@ class GreetingsViewModel @Inject constructor(
             }
             val user = User(Random.nextInt(), usernameText.value)
             registerUC(user)
-            registrationCompleted = user
+            registrationCompleted.emit(user)
         }
     }
 
@@ -48,12 +49,6 @@ class GreetingsViewModel @Inject constructor(
 
     fun resetError() {
         error.value = NO_ERROR
-    }
-
-    fun reset() = viewModelScope.launch {
-        registrationCompleted = null
-        resetError()
-        usernameText.value = NO_ERROR
     }
 
     companion object {

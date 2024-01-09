@@ -25,6 +25,7 @@ import com.nurunabiyev.wpmapp.ui.theme.correctLetter
 import com.nurunabiyev.wpmapp.ui.theme.incorrectLetter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -136,13 +137,8 @@ class TypingViewModel @Inject constructor(
         }
     }
 
-    fun reset() = viewModelScope.launch {
-        text = TextFieldValue()
-        currentReference.value = restOfReference(0)
-        rawKeystrokes.clear()
-        analytics = Analytics(referenceText, latestKeystroke, viewModelScope)
-        withContext(Dispatchers.IO) {
-            deleteStatisticsUC()
-        }
+    override fun onCleared() {
+        MainScope().launch(Dispatchers.IO) { deleteStatisticsUC() }
+        super.onCleared()
     }
 }

@@ -2,17 +2,18 @@ package com.nurunabiyev.wpmapp.features.greetings.presentation.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.nurunabiyev.wpmapp.core.user.data.userSaver
 import com.nurunabiyev.wpmapp.core.user.domain.User
 import com.nurunabiyev.wpmapp.features.wpmcounter.presentation.view.TypingScreen
@@ -29,20 +30,21 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    var screen by remember { mutableStateOf(Screen.Greetings) }
+                    val navController = rememberNavController()
                     var user by rememberSaveable(stateSaver = userSaver) { mutableStateOf(User(-1, "")) }
-                    when (screen) {
-                        Screen.Greetings -> GreetingScreen(onUserRegistered = {
-                            user = it
-                            screen = Screen.Type
-                        })
-                        Screen.Type -> TypingScreen(user)
-                    }
 
-                    BackHandler(enabled = true) {
-                        when (screen) {
-                            Screen.Greetings -> finish()
-                            Screen.Type -> screen = Screen.Greetings
+                    NavHost(
+                        navController,
+                        startDestination = "greetings"
+                    ) {
+                        composable("greetings") {
+                            GreetingScreen(onUserRegistered = {
+                                user = it
+                                navController.navigate("typing")
+                            })
+                        }
+                        composable("typing") {
+                            TypingScreen(navController, user)
                         }
                     }
                 }
