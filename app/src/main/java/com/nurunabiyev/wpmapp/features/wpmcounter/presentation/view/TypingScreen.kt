@@ -105,11 +105,6 @@ fun TypingScreen(
 
 @Composable
 private fun ReferenceParagraph(modifier: Modifier, currentReference: AnnotatedString) {
-    val textSize = when (LocalConfiguration.current.orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> 12.sp
-        Configuration.ORIENTATION_PORTRAIT -> 15.sp
-        else -> 14.sp
-    }
     Text(
         currentReference,
         style = Typography.bodyLarge,
@@ -124,12 +119,6 @@ private fun ReferenceParagraph(modifier: Modifier, currentReference: AnnotatedSt
 
 @Composable
 private fun UserEditText(modifier: Modifier, vm: TypingViewModel) {
-    val textSize = when (LocalConfiguration.current.orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> 12.sp
-        Configuration.ORIENTATION_PORTRAIT -> 15.sp
-        else -> 14.sp
-    }
-
     OutlinedTextField(
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
@@ -202,6 +191,14 @@ private fun Stats(analytics: Analytics) {
         )
     }
 }
+
+private val textSize
+    @Composable
+    get() = when (LocalConfiguration.current.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> 12.sp
+        Configuration.ORIENTATION_PORTRAIT -> 15.sp
+        else -> 14.sp
+    }
 
 
 @Preview(showBackground = true)
