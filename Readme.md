@@ -4,6 +4,9 @@ This is an Android app to test and improve your typing speed and accuracy.
 ## Installation
 To run the project in Android studio, add a `local.properties` file in root with single line - path to Android Sdk such as `sdk.dir=/Users/nuru/Library/Android/sdk`
 
+Or install directly release version from app/release/app-release.apk:
+[app-release.apk](app%2Frelease%2Fapp-release.apk)
+
 ## Test
 There is a single test AnalyticsTest.kt. More info on how to run and what to expect is in code doc
 
