@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -104,10 +105,15 @@ fun TypingScreen(
 
 @Composable
 private fun ReferenceParagraph(modifier: Modifier, currentReference: AnnotatedString) {
+    val textSize = when (LocalConfiguration.current.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> 12.sp
+        Configuration.ORIENTATION_PORTRAIT -> 15.sp
+        else -> 14.sp
+    }
     Text(
         currentReference,
         style = Typography.bodyLarge,
-        fontSize = 15.sp,
+        fontSize = textSize,
         modifier = Modifier
             .padding(top = 8.dp)
             .background(Pink40.copy(0.1f), shape = RoundedCornerShape(8.dp))
@@ -118,9 +124,16 @@ private fun ReferenceParagraph(modifier: Modifier, currentReference: AnnotatedSt
 
 @Composable
 private fun UserEditText(modifier: Modifier, vm: TypingViewModel) {
+    val textSize = when (LocalConfiguration.current.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> 12.sp
+        Configuration.ORIENTATION_PORTRAIT -> 15.sp
+        else -> 14.sp
+    }
+
     OutlinedTextField(
         value = vm.text,
         shape = RoundedCornerShape(8.dp),
+        textStyle = TextStyle.Default.copy(fontSize = textSize),
         enabled = vm.inputEnabled,
         onValueChange = {
             vm.registerNewKeystroke(it)

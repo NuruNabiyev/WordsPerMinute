@@ -35,15 +35,15 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController,
-                        startDestination = "greetings"
+                        startDestination = ScreenNavigation.Greetings.route
                     ) {
-                        composable("greetings") {
+                        composable(ScreenNavigation.Greetings.route) {
                             GreetingScreen(onUserRegistered = {
                                 user = it
-                                navController.navigate("typing")
+                                navController.navigate(ScreenNavigation.Typing.route)
                             })
                         }
-                        composable("typing") {
+                        composable(ScreenNavigation.Typing.route) {
                             TypingScreen(navController, user)
                         }
                     }

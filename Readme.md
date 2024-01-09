@@ -26,4 +26,3 @@ This is a simple app yet
 1. Since this is an offline app, I skipped separating Repository internals into DatabaseSource and Network source (since only DB is present)
 2. Testing could be fine granular, but I decided to implement 'user-centric' test cases
 3. UI testing was not implemented in favor of previous point
-4. UI during landscape orientation could be improved
