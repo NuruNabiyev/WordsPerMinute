@@ -2,7 +2,7 @@
 This is an Android app to test and improve your typing speed and accuracy.
 
 ## Installation
-To run the project in Android studio, add a 'local.properties' file in root with single line - path to Android Sdk such as 'sdk.dir=/Users/nuru/Library/Android/sdk'
+To run the project in Android studio, add a `local.properties` file in root with single line - path to Android Sdk such as `sdk.dir=/Users/nuru/Library/Android/sdk`
 
 ## Test
 There is a single test AnalyticsTest.kt. More info on how to run and what to expect is in code doc
@@ -16,7 +16,7 @@ This is a simple app yet
 5. Hilt is used for Dependency injection
 6. Coroutines, Flows, Jetpack Compose States
 7. For UI a Jetpack compose is used
-8. SOLID principles
+8. SOLID and composition principles
 9. Domain Driven Design, with separation from Database classes, such as User.kt and UserDb.kt; domain transfer objects
 10. Repository Patterns
 11. KISS and DRY principles are applied
